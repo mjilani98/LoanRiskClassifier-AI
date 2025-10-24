@@ -14,49 +14,150 @@ public class Driver {
 		
 		//get the training data file 
 		System.out.println("Enter the name of Training data file : ");
-		String trainingFile = input.nextLine();
+		String inputTrainingFile = input.nextLine();
 		//get the test data file
 		System.out.println("Enter the name of Test data file : ");
-		String testFile = input.nextLine();
+		String inputTestFile = input.nextLine();
 		//get the classified data file
 		System.out.println("Enter the name of classified file :");
 		String classifiedFile = input.nextLine();
 		
-		//convert test file
-		convertTestFile(testFile,classifiedFile);
+		//convert training file to numerical format
+		convertTrainingFile(inputTrainingFile,"numericalTraining.txt");
+		
+		//convert test file to numerical format
+		convertTestFile(inputTestFile,"numericalTest.txt");
+		
+		//create a classifier object
+		Classifier classifier = new Classifier(3);
+		
+		//load training file to classifier
+		classifier.loadTrainingFile("numericalTraining.txt");
+		
+		//classify test data
+		classifier.classifyData("numericalTest.txt", "result.txt");
+		
+		//convert classified file to text format
+		convertClassFile("result.txt",classifiedFile);
+		
 		
 	}
 	
-	//method converts test file to numerical format 
-	public static void convertTestFile(String testFile,String outputFile) throws IOException
+	//method converts training file to numerical format 
+	public static void convertTrainingFile(String inputFile,String outputFile)throws IOException
 	{
 		//input and output files
-        Scanner inFile = new Scanner(new File(testFile));
+        Scanner inFile = new Scanner(new File(inputFile)); 
         PrintWriter outFile = new PrintWriter(new FileWriter(outputFile));
         
+        //read number of records, attributes, classes
+        int numberRecords = inFile.nextInt();    
+        int numberAttributes = inFile.nextInt();    
+        int numberClasses = inFile.nextInt();
         
+        //write number of records, attributes, classes
+        outFile.println(numberRecords + " " + numberAttributes + " " + numberClasses);
         
-        while(inFile.hasNext())
+        //for each record
+        for(int x = 0 ; x < numberRecords ; x++)
         {
-        	//credit score
-        	double creditScore = inFile.nextDouble();
+        	//convert credit score
+        	int creditScore = inFile.nextInt();
         	outFile.print(convertCreditScore(creditScore)+" ");
-        	//income
-        	double income = inFile.nextDouble();
-        	outFile.print(convertIncome(income) + " ");
-        	//age
-        	double age = inFile.nextDouble();
+        	
+        	//convert income 
+        	int income =  inFile.nextInt();
+        	outFile.print(convertIncome(income)+" ");
+        	
+        	//convert age
+        	int age = inFile.nextInt();
         	outFile.print(convertAge(age)+" ");
-        	//sex
+        	
+        	//convert sex
         	String sex = inFile.next();
         	outFile.print(convertSex(sex)+" ");
-        	//status
-        	String status = inFile.next();
-        	outFile.print(convertMaritalStatus(status)+" ");
+        	
+        	//convert marital status
+        	String maritalStatus = inFile.next();
+        	outFile.print(convertMaritalStatus(maritalStatus)+" ");
+        	
+        	//convert class
+        	String strClass  = inFile.next();
+        	outFile.print(convertClassToNumber(strClass));
+        	
+        	//new line
         	outFile.println();
+        	
         }
         
         
+        inFile.close();
+        outFile.close();
+	}
+	
+	//method converts test file to numerical format 
+	public static void convertTestFile(String inputFile,String outputFile) throws IOException
+	{
+		//input and output files
+        Scanner inFile = new Scanner(new File(inputFile)); 
+        PrintWriter outFile = new PrintWriter(new FileWriter(outputFile));
+        
+        //read number of records, attributes, classes
+        int numberRecords = inFile.nextInt();    
+        
+        //write number of records, attributes, classes
+        outFile.println(numberRecords);
+        
+        //for each record
+        for(int x = 0 ; x < numberRecords ; x++)
+        {
+        	//convert credit score
+        	int creditScore = inFile.nextInt();
+        	outFile.print(convertCreditScore(creditScore)+" ");
+        	
+        	//convert income 
+        	int income =  inFile.nextInt();
+        	outFile.print(convertIncome(income)+" ");
+        	
+        	//convert age
+        	int age = inFile.nextInt();
+        	outFile.print(convertAge(age)+" ");
+        	
+        	//convert sex
+        	String sex = inFile.next();
+        	outFile.print(convertSex(sex)+" ");
+        	
+        	//convert marital status
+        	String maritalStatus = inFile.next();
+        	outFile.print(convertMaritalStatus(maritalStatus)+" ");
+        	
+        	//new line
+        	outFile.println();
+        }
+        
+        inFile.close();
+        outFile.close();
+	}
+	
+	//method converts classified file to text format
+	public static void convertClassFile(String inputFile, String outputFile)throws IOException
+	{
+		//input and output files
+        Scanner inFile = new Scanner(new File(inputFile));
+        PrintWriter outFile = new PrintWriter(new FileWriter(outputFile));
+        
+        //read number of records
+        int numberRecords = inFile.nextInt();    
+
+        //write number of records
+        outFile.println(numberRecords);
+        
+        //for each record
+        for(int x=0; x<numberRecords ; x++)
+        {
+        	int number = inFile.nextInt();
+        	outFile.println(convertNumberToClass(number));
+        }
         
         inFile.close();
         outFile.close();
@@ -81,7 +182,7 @@ public class Driver {
 	}
 	
 	//method normalizes sex
-	public static int convertSex(String sex)
+	public static double convertSex(String sex)
 	{
 		if(sex.equals("male")) 
 			return 1;	// 1 for male
@@ -93,27 +194,38 @@ public class Driver {
 	public static double convertMaritalStatus(String status)
 	{
 		if(status.equals("single"))
-			return 0;
+			return 0;						//0 for single
 		else if(status.equals("married"))
-			return 0.5;
+			return 0.5;						//0.5 for married
 		else
-			return 1;
+			return 1;						//1.0 for divorced
 	}
 	
 	//method normalizes class
-	
-	public static double convertClassToNumber(String risk)
+	public static int convertClassToNumber(String risk)
 	{
 		if(risk.equals("low"))
-			return 0.25;				//0.25 for low 
+			return 1;				//0.25 for low 
 		else if(risk.equals("medium"))  
-			return 0.50;				//0.50 for medium
+			return 2;				//0.50 for medium
 		else if(risk.equals("high"))
-			return 0.75;				//0.75 for high
+			return 3;				//0.75 for high
 		else
-			return 1.0;					//1.0 for undetermined
+			return 4;					//1.0 for undetermined
 	}
 	
-	
+	//method converts number to class
+	public static String convertNumberToClass(int number)
+	{
+		if(number == 1)
+			return "low";
+		else if(number == 2)
+			return "medium";
+		else if(number == 3)
+			return "high";
+		else
+			return "undetermined";
+				
+	}
 
 }
