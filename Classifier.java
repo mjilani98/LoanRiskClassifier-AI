@@ -207,7 +207,40 @@ public class Classifier
       return maxIndex + 1;
     }
     
-    
+    //method validates classifier using leave one out method 
+    //returns the error rate
+    public double validate()
+    {
+    	double errorRate=0;		//error rate
+    	int numberErrors=0;		//number of errors
+    	
+    	for(int x=0; x<numberRecords; x++)
+    	{
+    		//use one record for validation
+    		//remove one record
+    		Record tempRecord = records.remove(x);
+    		numberRecords-=1;
+    		
+    		double[] attributesArray = tempRecord.attributes;	//attribute of the record
+    		int recordClass = tempRecord.className;				//class of the record
+    		
+    		//classify temp record
+    		int prediction = classify(attributesArray);
+    		
+    		//check if prediction matches actual class
+    		if(prediction != recordClass)
+    			numberErrors+=1;		//increment number of errors
+    		
+    		//add the record back to the list 
+    		records.add(x, tempRecord);	
+    		numberRecords+=1;
+    	}
+    	
+    	//calculate error rate 
+    	errorRate = 100.0*numberErrors/numberRecords;
+    	
+    	return errorRate;
+    }
     
 
 }

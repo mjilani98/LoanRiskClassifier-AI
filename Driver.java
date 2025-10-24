@@ -5,6 +5,8 @@ import java.io.PrintWriter;
 import java.util.Scanner;
 
 public class Driver {
+	
+	private static final int NEIGHBORS = 6;
 
 	public static void main(String[] args) throws IOException
 	{
@@ -29,7 +31,7 @@ public class Driver {
 		convertTestFile(inputTestFile,"numericalTest.txt");
 		
 		//create a classifier object
-		Classifier classifier = new Classifier(3);
+		Classifier classifier = new Classifier(NEIGHBORS);
 		
 		//load training file to classifier
 		classifier.loadTrainingFile("numericalTraining.txt");
@@ -38,7 +40,7 @@ public class Driver {
 		classifier.classifyData("numericalTest.txt", "result.txt");
 		
 		//convert classified file to text format
-		convertClassFile("result.txt",classifiedFile);
+		convertClassFile("result.txt",classifiedFile,classifier);
 		
 		
 	}
@@ -140,7 +142,7 @@ public class Driver {
 	}
 	
 	//method converts classified file to text format
-	public static void convertClassFile(String inputFile, String outputFile)throws IOException
+	public static void convertClassFile(String inputFile, String outputFile,Classifier classifier)throws IOException
 	{
 		//input and output files
         Scanner inFile = new Scanner(new File(inputFile));
@@ -158,6 +160,9 @@ public class Driver {
         	int number = inFile.nextInt();
         	outFile.println(convertNumberToClass(number));
         }
+        
+        outFile.println("Validation error : %"+classifier.validate()); //write error rate to
+        outFile.println("Number of nearest neighbor : "+NEIGHBORS);	   //write nearest neighbor
         
         inFile.close();
         outFile.close();
